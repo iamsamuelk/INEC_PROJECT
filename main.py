@@ -30,19 +30,19 @@ def get_db():
 
 # Route to display polling unit result
 
-@app.get("/polling_unit/{polling_unit_id}")
+@app.get("/polling_unit/{polling_unit_name}")
 async def read_polling_unit_result(
-    polling_unit_id: int,
+    polling_unit_name: str,
     db: Session = Depends(get_db)
 ):
-    results = crud.get_pu_results(db, polling_unit_id)
+    results = crud.get_polling_unit_results(db, polling_unit_name)
     return results
 
 
 # Route to display summed total result of all polling units under an lga
-@app.get("/lga_results/{lga_id}")
-async def read_lga_results(lga_id: int, db: Session = Depends(get_db)):
-    results = crud.get_lga_results(db, lga_id)
+@app.get("/lga_results/{lga_name}")
+async def read_lga_results(lga_name: str, db: Session = Depends(get_db)):
+    results = crud.get_lga_results(db, lga_name)
     return results
 
 

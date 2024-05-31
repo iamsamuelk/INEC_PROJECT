@@ -1,32 +1,47 @@
 from fastapi import HTTPException
 from sqlalchemy import func, cast, Integer
 from sqlalchemy.orm import Session
-from models import PollingUnit, AnnouncedPUResults
+from models import PollingUnit, AnnouncedPUResults, LGA
 import schema
 from datetime import datetime
 
 
-def get_pu_results(db: Session, polling_unit_id: int,):
+def get_polling_unit_results(db: Session, polling_unit_name: str):
+    polling_unit = db.query(PollingUnit).filter(
+        PollingUnit.polling_unit_name == polling_unit_name
+    ).first()
+    if not polling_unit:
+        raise HTTPException(status_code=404, detail="Polling unit not found")
+
     results = db.query(AnnouncedPUResults).filter(
         cast(AnnouncedPUResults.polling_unit_uniqueid, Integer) ==
-        polling_unit_id
+        PollingUnit.uniqueid
     ).all()
     if not results:
-        raise HTTPException(status_code=404, detail="Polling unit not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Results not found for the given polling unit"
+        )
     return results
 
 
-def get_lga_results(db: Session, lga_id: int):
+def get_lga_results(db: Session, lga_name: str):
     try:
+        lga = db.query(LGA).filter(LGA.lga_name == lga_name).first()
+        if not lga:
+            raise HTTPException(status_code=404, detail="LGA not found")
+
         results = db.query(
             AnnouncedPUResults.party_abbreviation,
             func.sum(AnnouncedPUResults.party_score).label('total_score')
         ).join(
             PollingUnit,
-            (cast(AnnouncedPUResults.polling_unit_uniqueid, Integer) ==
-             PollingUnit.uniqueid)
+            (
+                cast(AnnouncedPUResults.polling_unit_uniqueid, Integer) ==
+                PollingUnit.uniqueid
+            )
         ).filter(
-            PollingUnit.lga_id == lga_id
+            PollingUnit.lga_id == lga.lga_id
         ).group_by(
             AnnouncedPUResults.party_abbreviation
         ).all()
@@ -34,7 +49,7 @@ def get_lga_results(db: Session, lga_id: int):
         if not results:
             raise HTTPException(
                 status_code=404,
-                detail="LGA not found or no results available"
+                detail="No results available for the given LGA"
             )
 
         # Convert query results to list of dictionaries
