@@ -1,8 +1,11 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from models import AnnouncedPUResults, PollingUnit
+from datetime import datetime
+import crud
+import schema
+import socket
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -32,14 +35,37 @@ async def read_polling_unit_result(
     polling_unit_id: int,
     db: Session = Depends(get_db)
 ):
-    results = db.query(AnnouncedPUResults).filter(
-        AnnouncedPUResults.polling_unit_uniqueid == str(polling_unit_id)
-    ).all()
-    if not results:
-        raise HTTPException(status_code=404, detail="Polling unit not found")
+    results = crud.get_pu_results(db, polling_unit_id)
     return results
 
 
 # Route to display summed total result of all polling units under an lga
+@app.get("/lga_results/{lga_id}")
+async def read_lga_results(lga_id: int, db: Session = Depends(get_db)):
+    results = crud.get_lga_results(db, lga_id)
+    return results
 
 
+#  Route to store new results for polling units
+@app.post("/add_polling_unit_results/", response_model=dict)
+def add_polling_unit_results(results: schema.PollingUnitResults,
+                             db: Session = Depends(get_db)):
+    for result in results.results:
+        # Check if the polling unit exists
+        polling_unit = crud.get_polling_unit(db, result.polling_unit_uniqueid)
+        if not polling_unit:
+            raise HTTPException(
+                status_code=404,
+                detail=("Polling unit with id "
+                        + f"{result.polling_unit_uniqueid} not found")
+            )
+
+        # Create a new result entry
+        crud.create_polling_unit_result(
+            db=db,
+            result=result,
+            date_entered=datetime.utcnow(),
+            user_ip_address=socket.gethostbyname(socket.gethostname())
+        )
+
+    return {"message": "Results added successfully"}
