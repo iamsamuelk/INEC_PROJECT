@@ -64,7 +64,7 @@ def add_polling_unit_results(results: schema.PollingUnitResults,
         crud.create_polling_unit_result(
             db=db,
             result=result,
-            date_entered=datetime.utcnow(),
+            date_entered=datetime.now(),
             user_ip_address=socket.gethostbyname(socket.gethostname())
         )
 
