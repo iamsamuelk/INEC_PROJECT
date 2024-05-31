@@ -8,7 +8,6 @@ class Settings(BaseSettings):
     SQLALCHEMY_DATABASE_URL: str = (
         "postgresql://vgsykulb:xsMjB35xK8R5wiNakTbmdl0pB8PY5tQk@"
         "drona.db.elephantsql.com/vgsykulb"
-        "Bincom_test_INEC"
     )
 
 

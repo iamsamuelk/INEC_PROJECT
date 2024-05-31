@@ -94,7 +94,7 @@ class PollingUnit(Base):
     polling_unit_name = Column(String(50))
     polling_unit_description = Column(String)
     lat = Column(String(255))
-    long = Column(String(255))
+    lon = Column(String(255))
     entered_by_user = Column(String(50))
     date_entered = Column(DateTime)
     user_ip_address = Column(String(50))
