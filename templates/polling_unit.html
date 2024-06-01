@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Polling Unit Results</title>
+</head>
+<body>
+    <h1>Polling Unit Results</h1>
+    <form id="polling_unit_form" method="get">
+        <label for="polling_unit_name">Select Polling Unit Name:</label>
+        <select id="polling_unit_name" name="polling_unit_name" required>
+            <option value="">Select a polling unit</option>
+            <option value="Sapele Ward 8 PU _">Sapele Ward 8 PU _</option>
+            <option value="Primary School in Aghara">Primary School in Aghara</option>
+            <option value="Ishere Primary School Aghara">Ishere Primary School Aghara</option>
+            <option value="Igini Primary School">Igini Primary School</option>
+            <option value="Umukwapa poll unit 1">Umukwapa poll unit 1</option>
+            <option value="Church in Effurun1 Ovie">Church in Effurun1 Ovie</option>
+            <option value="Ishere Primary School Aghara">Ishere Primary School Aghara</option>
+            <option value="Effurun 2 in Uvwie">Effurun 2 in Uvwie</option>
+            <option value="school in ethiope west">school in ethiope west</option>
+            <option value="agbasa 1">agbasa 1</option>
+            <option value="Customary Court P.t.i Road">Customary Court P.t.i Road</option>
+            <option value="effurun 2">effurun 2</option>
+            <option value="asumbo town hall1">asumbo town hall1</option>
+            <option value="eki-otoi">eki-otoi</option>
+            <option value="pollling 3 in agbara">pollling 3 in agbara</option>
+            <option value="aghara ii">aghara ii</option>
+            <option value="obiteogbon quarters">obiteogbon quarters</option>
+            <option value="okegbe quarter1">okegbe quarter1</option>
+            <option value="agbasa 1">agbasa 1</option>
+            <option value="anocha north">anocha north</option>
+            <option value="gra ward">gra ward</option>
+            <option value="school in ethiope west">school in ethiope west</option>
+            <option value="ellu">ellu</option>
+            <option value="emami quarter 2">emami quarter 2</option>
+            <option value="emami quarter 1">emami quarter 1</option>
+            <option value="oguanja quarters">oguanja quarters</option>
+            <option value="okegbe quarters 2">okegbe quarters 2</option>
+            <option value="obiteogbon quarters">obiteogbon quarters</option>
+            <option value="ajudaibo primary school">ajudaibo primary school</option>
+            <option value="asumbo town hall1">asumbo town hall1</option>
+            <option value="isoko north">isoko north</option>
+            <option value="hall 2">hall 2</option>
+            <option value="school in ethiope west">school in ethiope west</option>
+            <option value="uvwie">uvwie</option>
+            <option value="ughelli">ughelli</option>
+            <option value="cable point i">cable point i</option>
+            <option value="aka avenue">aka avenue</option>
+            <option value="sapele">sapele</option>
+            <option value="ethiope">ethiope</option>
+            <option value="Aniocha North 4">Aniocha North 4</option>
+            <option value="aniocha ward 3">aniocha ward 3</option>
+            <option value="aniocha ward 4">aniocha ward 4</option>
+            <option value="uru standard junction off jakpa rd">uru standard junction off jakpa rd</option>
+            <option value="Oshimili South">Oshimili South</option>
+            <option value="Isoko South">Isoko South</option>
+            <option value="Oshimili">Oshimili</option>
+            <option value="Ndokwa east">Ndokwa east</option>
+            <option value="gra">gra</option>
+            <option value="seimbiri">seimbiri</option>
+            <option value="ndokwa">ndokwa</option>
+            <option value="kolafiogbene">kolafiogbene</option>
+            <option value="Udogbie Village">Udogbie Village</option>
+            <option value="Bomadi">Bomadi</option>
+        </select>
+        <button type="button" onclick="redirectToPollingUnit()">Get Results</button>
+    </form>
+    <li><a href="/">Home</a></li>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    {% if results %}
+        <h2>Results for {{ polling_unit_name }}:</h2>
+        <ul>
+            {% for result in results %}
+                <li>{{ result.party_abbreviation }}: {{ result.party_score }}</li>
+            {% endfor %}
+        </ul>
+    {% elif polling_unit_name %}
+        <p>No results found for {{ polling_unit_name }}</p>
+    {% endif %}
+
+    <script>
+    function redirectToPollingUnit() {
+        var pollingUnitName = document.getElementById("polling_unit_name").value;
+        var encodedPollingUnitName = encodeURIComponent(pollingUnitName);
+        window.location.href = "/polling_unit/" + encodedPollingUnitName;
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>LGA Results</title>
+</head>
+<body>
+    <h1>Results for {{ lga_name }}</h1>
+    <form id="lga_results_form" method="get">
+        <label for="lga_name">Select LGA Name:</label>
+        <select id="lga_name" name="lga_name" required>
+            <option value="">Select an LGA</option>
+            <option value="Aniocha North">Aniocha North</option>
+            <option value="Aniocha - South">Aniocha - South</option>
+            <option value="Ethiope East">Ethiope East</option>
+            <option value="Ethiope West">Ethiope West</option>
+            <option value="Ika North - East">Ika North - East</option>
+            <option value="Ika - South">Ika - South</option>
+            <option value="Isoko North">Isoko North</option>
+            <option value="Isoko South">Isoko South</option>
+            <option value="Ndokwa East">Ndokwa East</option>
+            <option value="Ndokwa West">Ndokwa West</option>
+            <option value="Okpe">Okpe</option>
+            <option value="Oshimili - North">Oshimili - North</option>
+            <option value="Oshimili - South">Oshimili - South</option>
+            <option value="Patani">Patani</option>
+            <option value="Sapele">Sapele</option>
+            <option value="Udu">Udu</option>
+            <option value="Ughelli North">Ughelli North</option>
+            <option value="Ughelli South">Ughelli South</option>
+            <option value="Ukwuani">Ukwuani</option>
+            <option value="Uvwie">Uvwie</option>
+            <option value="Bomadi">Bomadi</option>
+            <option value="Burutu">Burutu</option>
+            <option value="Warri North">Warri North</option>
+            <option value="Warri South">Warri South</option>
+            <option value="Warri South West">Warri South West</option>
+        </select>
+        <button type="button" onclick="redirectToLGAResults()">Get Results</button>
+    </form>
+    <li><a href="/">Home</a></li>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    {% if results %}
+        <h2>Summed Total Results:</h2>
+        <ul>
+            {% for result in results %}
+                <li>{{ result.party_abbreviation }}: {{ result.total_score }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <script>
+    function redirectToLGAResults() {
+        var lgaName = document.getElementById("lga_name").value;
+        var encodedLGAName = encodeURIComponent(lgaName);
+        window.location.href = "/lga_results/" + encodedLGAName;
+    }
+    </script>
+</body>
+</html>

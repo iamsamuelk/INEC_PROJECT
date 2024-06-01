@@ -1,9 +1,12 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, status
+from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, cast, Integer
 from sqlalchemy.orm import Session
 from models import PollingUnit, AnnouncedPUResults, LGA
 import schema
 from datetime import datetime
+
+templates = Jinja2Templates(directory="templates")
 
 
 def get_polling_unit_results(db: Session, polling_unit_name: str):
@@ -11,17 +14,20 @@ def get_polling_unit_results(db: Session, polling_unit_name: str):
         PollingUnit.polling_unit_name == polling_unit_name
     ).first()
     if not polling_unit:
-        raise HTTPException(status_code=404, detail="Polling unit not found")
+        return templates.TemplateResponse(
+            "home.html",
+            status_code=status.HTTP_302_FOUND
+        )
 
     results = db.query(AnnouncedPUResults).filter(
         cast(AnnouncedPUResults.polling_unit_uniqueid, Integer) ==
         PollingUnit.uniqueid
     ).all()
     if not results:
-        raise HTTPException(
-            status_code=404,
-            detail="Results not found for the given polling unit"
-        )
+        return {
+            "error": "No results found for the selected polling unit",
+            "polling_unit_name": polling_unit_name
+        }
     return results
 
 
@@ -47,10 +53,10 @@ def get_lga_results(db: Session, lga_name: str):
         ).all()
 
         if not results:
-            raise HTTPException(
-                status_code=404,
-                detail="No results available for the given LGA"
-            )
+            return {
+                "error": "No results found for the selected LGA",
+                "lga_name": lga_name
+            }
 
         # Convert query results to list of dictionaries
         formatted_results = [

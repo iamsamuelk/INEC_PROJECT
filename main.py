@@ -1,5 +1,7 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from datetime import datetime
@@ -9,6 +11,8 @@ import socket
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 # Database connection
 SQLALCHEMY_DATABASE_URL = (
@@ -28,22 +32,65 @@ def get_db():
         db.close()
 
 
-# Route to display polling unit result
+# Home route
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("home.html", {"request": request})
 
+
+# Route to render polling_unit.html
+@app.get("/polling_unit", response_class=HTMLResponse)
+async def get_polling_unit_page(request: Request):
+    return templates.TemplateResponse(
+        "polling_unit.html",
+        {"request": request}
+    )
+
+
+# Route to display polling unit result
 @app.get("/polling_unit/{polling_unit_name}")
 async def read_polling_unit_result(
+    request: Request,
     polling_unit_name: str,
     db: Session = Depends(get_db)
 ):
     results = crud.get_polling_unit_results(db, polling_unit_name)
-    return results
+    if "error" in results:
+        return templates.TemplateResponse("lga_results.html", {
+            "request": request,
+            "polling_unit_name": polling_unit_name,
+            "error": results["error"]
+        })
+    return templates.TemplateResponse("polling_unit.html", {
+        "request": request,
+        "polling_unit_name": polling_unit_name,
+        "results": results
+    })
+
+
+# Route to render lga_results.html
+@app.get("/lga_results", response_class=HTMLResponse)
+async def get_lga_results_page(request: Request):
+    return templates.TemplateResponse("lga_results.html", {"request": request})
 
 
 # Route to display summed total result of all polling units under an lga
 @app.get("/lga_results/{lga_name}")
-async def read_lga_results(lga_name: str, db: Session = Depends(get_db)):
+async def read_lga_results(
+    request: Request, lga_name: str, db: Session = Depends(get_db)
+):
     results = crud.get_lga_results(db, lga_name)
-    return results
+    if "error" in results:
+        return templates.TemplateResponse("lga_results.html", {
+            "request": request,
+            "lga_name": lga_name,
+            "error": results["error"]
+        })
+    return templates.TemplateResponse("lga_results.html", {
+        "request": request,
+        "lga_name": lga_name,
+        "results": results
+    })
 
 
 #  Route to store new results for polling units
