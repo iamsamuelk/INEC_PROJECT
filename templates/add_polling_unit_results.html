@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Add Polling Unit Results</title>
+</head>
+<body>
+    <h1>Add New Polling Unit Results</h1>
+    <form id="results_form" method="post" action="/add_polling_unit_results/">
+        <label for="polling_unit_uniqueid">Polling Unit Unique ID:</label>
+        <input type="number" id="polling_unit_uniqueid" name="polling_unit_uniqueid" required>
+        <br>
+        <label for="party_abbreviation">Party Abbreviation:</label>
+        <input type="text" id="party_abbreviation" name="party_abbreviation" required>
+        <br>
+        <label for="party_score">Party Score:</label>
+        <input type="number" id="party_score" name="party_score" required>
+        <br>
+        <label for="entered_by_user">Entered By User:</label>
+        <input type="text" id="entered_by_user" name="entered_by_user" required>
+        <br>
+        <button type="submit">Submit Results</button>
+    </form>
+    <li><a href="/">Home</a></li>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+</body>
+</html>

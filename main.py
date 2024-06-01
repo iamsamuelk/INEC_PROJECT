@@ -93,26 +93,72 @@ async def read_lga_results(
     })
 
 
-#  Route to store new results for polling units
-@app.post("/add_polling_unit_results/", response_model=dict)
-def add_polling_unit_results(results: schema.PollingUnitResults,
-                             db: Session = Depends(get_db)):
-    for result in results.results:
-        # Check if the polling unit exists
-        polling_unit = crud.get_polling_unit(db, result.polling_unit_uniqueid)
-        if not polling_unit:
-            raise HTTPException(
-                status_code=404,
-                detail=("Polling unit with id "
-                        + f"{result.polling_unit_uniqueid} not found")
+# Route to render add_polling_unit_results.html
+@app.get("/add_polling_unit_results", response_class=HTMLResponse)
+async def get_add_polling_unit_results_page(request: Request):
+    return templates.TemplateResponse(
+        "add_polling_unit_results.html",
+        {"request": request}
+    )
+
+
+# Route to store new results for polling units
+@app.post("/add_polling_unit_results", response_class=HTMLResponse)
+async def add_polling_unit_results(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    form = await request.form()
+    polling_unit_uniqueid = int(form.get("polling_unit_uniqueid"))
+    party_abbreviation = form.get("party_abbreviation")
+    party_score = int(form.get("party_score"))
+    entered_by_user = form.get("entered_by_user")
+
+    # Create schema instance
+    results = schema.PollingUnitResults(
+        results=[
+            schema.PollingUnitResult(
+                polling_unit_uniqueid=polling_unit_uniqueid,
+                party_abbreviation=party_abbreviation,
+                party_score=party_score,
+                entered_by_user=entered_by_user
+            )
+        ]
+    )
+
+    try:
+        for result in results.results:
+            # Check if the polling unit exists
+            polling_unit = crud.get_polling_unit(
+                db, result.polling_unit_uniqueid
+            )
+            if not polling_unit:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Polling unit with id " +
+                    str(result.polling_unit_uniqueid) + " not found"
+                )
+
+            # Create a new result entry
+            crud.create_polling_unit_result(
+                db=db,
+                result=result,
+                date_entered=datetime.now(),
+                user_ip_address=socket.gethostbyname(socket.gethostname())
             )
 
-        # Create a new result entry
-        crud.create_polling_unit_result(
-            db=db,
-            result=result,
-            date_entered=datetime.now(),
-            user_ip_address=socket.gethostbyname(socket.gethostname())
+        message = "Results added successfully"
+        return templates.TemplateResponse(
+            "add_polling_unit_results.html",
+            {"request": request, "message": message}
         )
-
-    return {"message": "Results added successfully"}
+    except HTTPException as e:
+        return templates.TemplateResponse(
+            "add_polling_unit_results.html",
+            {"request": request, "error": e.detail}
+        )
+    except Exception as e:
+        return templates.TemplateResponse(
+            "add_polling_unit_results.html",
+            {"request": request, "error": str(e)}
+        )

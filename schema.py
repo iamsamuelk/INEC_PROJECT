@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 
 
 class PollingUnitResult(BaseModel):
@@ -9,4 +10,4 @@ class PollingUnitResult(BaseModel):
 
 
 class PollingUnitResults(BaseModel):
-    results: list[PollingUnitResult]
+    results: List[PollingUnitResult]
