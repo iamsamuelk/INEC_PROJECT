@@ -14,7 +14,7 @@ The project is hosted at: [INEC Project](https://inec-project.onrender.com/)
 
 ### Tech Stack
 
-- **Backend:** FastAPI
+- **Backend:** FastAPI, Django
 - **Database:** PostgreSQL
 - **Frontend:** HTML, CSS, Jinja2 Templates
 - **Hosting:** Render
